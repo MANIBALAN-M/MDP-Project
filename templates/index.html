@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Cycle Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-6 text-center">Time Cycle Predictor</h1>
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="heat">
+                    Heat (°C)
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="heat" type="number" placeholder="Enter heat in °C">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="crucible-weight">
+                    Crucible Weight (g)
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="crucible-weight" type="number" step="0.01" placeholder="Enter crucible weight in grams">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="substance-weight">
+                    Substance Weight (g)
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="substance-weight" type="number" step="0.01" placeholder="Enter substance weight in grams">
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onclick="predict()">
+                    Predict
+                </button>
+            </div>
+        </div>
+        <div id="result" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 hidden">
+            <h2 class="text-xl font-bold mb-4">Prediction Results</h2>
+            <div id="prediction-results"></div>
+        </div>
+    </div>
+    <script>
+        async function predict() {
+            const heat = document.getElementById('heat').value;
+            const crucibleWeight = document.getElementById('crucible-weight').value;
+            const substanceWeight = document.getElementById('substance-weight').value;
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    heat: heat,
+                    crucible_weight: crucibleWeight,
+                    substance_weight: substanceWeight
+                }),
+            });
+
+            const result = await response.json();
+            displayResults(result);
+        }
+
+        function displayResults(result) {
+            const resultDiv = document.getElementById('result');
+            const predictionResults = document.getElementById('prediction-results');
+            predictionResults.innerHTML = '';
+
+            for (const [key, value] of Object.entries(result)) {
+                const p = document.createElement('p');
+                p.innerHTML = `<strong>${key}:</strong> ${value} minutes`;
+                predictionResults.appendChild(p);
+            }
+
+            resultDiv.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+
